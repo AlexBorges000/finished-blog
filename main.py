@@ -1,10 +1,9 @@
+import os
 from functools import wraps
-
 from flask import Flask, render_template, redirect, url_for, flash, abort
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 from datetime import date
-
 from sqlalchemy import ForeignKey
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -14,7 +13,7 @@ from forms import CreatePostForm, RequisterForm, LoginForm, CommentForm
 from flask_gravatar import Gravatar
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['SECRET_KEY'] = os.environ["SECRET_KEY"]
 ckeditor = CKEditor(app)
 Bootstrap(app)
 
@@ -160,6 +159,7 @@ def contact():
 
 
 @app.route("/new-post", methods=["POST", "GET"])
+@login_required
 @admin_only
 def add_new_post():
     form = CreatePostForm()
@@ -181,6 +181,7 @@ def add_new_post():
 
 @app.route("/edit-post/<int:post_id>")
 @admin_only
+@login_required
 def edit_post(post_id):
     post = BlogPost.query.get(post_id)
     edit_form = CreatePostForm(
@@ -203,6 +204,7 @@ def edit_post(post_id):
 
 @app.route("/delete/<int:post_id>")
 @admin_only
+@login_required
 def delete_post(post_id):
     post_to_delete = BlogPost.query.get(post_id)
     db.session.delete(post_to_delete)
